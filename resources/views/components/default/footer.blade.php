@@ -6,7 +6,7 @@
         <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-8">
             <!-- Logo e institucional -->
             <div class="mb-6 md:mb-0 flex-1">
-                <img src="../../public/evolucao-logo.png" alt="Evolução Solar" class="h-12 mb-3 ">
+                <img src="{{ asset('image/evolucao-logo.png') }}" alt="Evolução Solar" class="h-12 mb-3 ">
                 <p class="text-sm text-blue-100 max-w-xs">A Evolução Solar é referência em energia solar fotovoltaica no Nordeste, levando economia e sustentabilidade para sua casa ou empresa.</p>
             </div>
             <!-- Links úteis -->

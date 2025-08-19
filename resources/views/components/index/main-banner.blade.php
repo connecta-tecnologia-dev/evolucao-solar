@@ -14,7 +14,7 @@
     </div>
     <!-- Imagem decorativa (opcional) -->
     <div class="hidden md:block flex-shrink-0">
-      <img src="../../assets/images/banner-solar.png" alt="Energia Solar" class="w-96 max-w-full rounded-lg shadow-lg border-4 border-yellow-400" onerror="this.style.display='none'">
+      <img src="{{ asset('image/banner-solar.png') }}" alt="Energia Solar" class="w-96 max-w-full rounded-lg shadow-lg border-4 border-yellow-400" onerror="this.style.display='none'">
     </div>
   </div>
   <!-- Detalhe decorativo -->

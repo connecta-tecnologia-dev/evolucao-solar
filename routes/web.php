@@ -17,3 +17,7 @@ Route::get('/cart', function () {
 Route::get('/favorites', function () {
     return view('favorites-page');
 });
+
+Route::get('/product-detail', function () {
+    return view('product-detail');
+})->name('product-detail');
