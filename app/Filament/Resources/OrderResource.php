@@ -19,7 +19,6 @@ use Filament\Forms\Get;
 use App\Models\Product;
 use Illuminate\Support\Str;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Select;   
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\Repeater;
@@ -27,6 +26,17 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextArea;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Actions\ActionGroup;
+use Illuminate\Support\Number;
 
 class OrderResource extends Resource
 {
@@ -44,7 +54,6 @@ class OrderResource extends Resource
                        ->label('Customer')
                        ->relationship('user', 'name')
                        ->searchable()
-                       ->preload()
                        ->required(),
                     
                        ToggleButtons::make('payment_method')
@@ -68,7 +77,7 @@ class OrderResource extends Resource
                        ->grouped()
                        ->label('Forma de Pagamento'),
 
-                       ToggleButtons::make('Payment_status')
+                       ToggleButtons::make('payment_status')
                        ->inline()
                        ->default('pending')
                        ->options([
@@ -90,7 +99,7 @@ class OrderResource extends Resource
                        ->grouped()
                        ->label('Status do Pagamento'),
 
-                      ToggleButtons::make('Status')
+                      ToggleButtons::make('status')
                       ->inline()
                       ->default('new')
                       ->options([
@@ -141,8 +150,12 @@ class OrderResource extends Resource
                         ->distinct()
                         ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                         ->columnSpan(4)
-                        ->afterStateUpdated(fn ($state, Set $set) => $set('unit_amount', Product::find($state)?->price??0))
-                        ->afterStateUpdated(fn ($state, Set $set) => $set('total_amount', Product::find($state)?->price??0))
+                        ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                            $price = Product::query()->whereKey($state)->value('price') ?? 0;
+                            $set('unit_amount', $price);
+                            $qty = (int) ($get('quantity') ?? 1);
+                            $set('total_amount', $qty * $price);
+                        })
                         ->required(),
 
                         TextInput::make('quantity')
@@ -157,16 +170,35 @@ class OrderResource extends Resource
                         TextInput::make('unit_amount')
                         ->numeric()
                         ->required()
-                        ->columnSpan(2)
-                        ->dehydrated()
-                        ->disabled(),
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->columnSpan(2),
 
                         TextInput::make('total_amount')
                         ->numeric()
                         ->required()
-                        ->dehydrated()
+                        ->dehydrated(false)
                         ->columnSpan(3),
-                      ])->columns(12)
+                      ])->columns(12),
+
+                      Placeholder::make('grand_total_placeholder')
+                      ->label('Grand Total')
+                      ->content(function (Get$get, Set $set){
+                        $total = 0;
+                        if (!$repeaters = $get('items')) {
+                          return $total;
+                        }
+                        foreach ($repeaters as $key => $repeater) {
+                            $total += $get("items.{$key}.total_amount");
+                        }
+                        $set('grand_total', $total);
+                         return Number::currency($total, 'BRL');
+                      }),
+
+                      Hidden::make('grand_total')
+                      ->default(0),
+
+                      
                     ])
                 ])->columnSpanFull(),
             ]);
@@ -177,27 +209,70 @@ class OrderResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('user.name')
+                ->sortable()
+                ->searchable()
                 ->label('Customer'),
 
+                TextColumn::make('grand_total')
+                ->sortable()
+                ->searchable()
+                ->money('BRL')
+                ->label('Grand Total'),
+
                 TextColumn::make('payment_method')
+                ->sortable()
+                ->searchable()
                 ->label('Payment Method'),
 
-                TextColumn::make('Payment_status')
+                TextColumn::make('payment_status')
+                ->sortable()
+                ->searchable()
                 ->label('Payment Status'),
 
-                TextColumn::make('Status')
+                TextColumn::make('shipping_method')
+                ->sortable()
+                ->searchable()
+                ->label('Shipping Method'),
+
+                SelectColumn::make('status')
+                ->options([
+                    'new' => 'New',
+                    'processing' => 'Processing',
+                    'shipped' => 'Shipped',
+                    'delivered' => 'Delivered',
+                    'cancelled' => 'Cancelled',
+                ])
+                ->searchable()
+                ->sortable()
                 ->label('Status'),
+
+                TextColumn::make('created_at')
+                ->dateTime()
+                ->toggleable(isToggledHiddenByDefault: true)
+                ->sortable()
+                ->searchable()
+                ->label('Created At'),
+
+                TextColumn::make('updated_at')
+                ->dateTime()
+                ->toggleable(isToggledHiddenByDefault: true)
+                ->sortable()
+                ->searchable()
+                ->label('Updated At'),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -208,6 +283,17 @@ class OrderResource extends Resource
             //
         ];
     }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) static::getModel()::count();
+    }    
+    
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return static::getModel()::count() > 10 ? 'sucess' : 'success';
+    }
+    
 
     public static function getPages(): array
     {
