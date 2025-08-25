@@ -5,13 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Set;
@@ -24,7 +21,6 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\Repeater;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextArea;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
@@ -42,7 +38,9 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static ?string $navigationIcon = 'her
+
+    oicon-o-shopping-cart';
 
     public static function form(Form $form): Form
     {
@@ -55,7 +53,7 @@ class OrderResource extends Resource
                        ->relationship('user', 'name')
                        ->searchable()
                        ->required(),
-                    
+
                        ToggleButtons::make('payment_method')
                        ->inline()
                        ->default('pix')
@@ -123,9 +121,9 @@ class OrderResource extends Resource
                         'shipped' => 'info',
                         'delivered' => 'success',
                         'cancelled' => 'danger',
-                      ])    
+                      ])
                       ->inlineLabel(false),
-                    
+
                       Select::make('shipping_method')
                       ->options([
                         'sedex' => 'Sedex',
