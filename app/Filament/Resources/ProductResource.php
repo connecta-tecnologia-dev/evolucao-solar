@@ -30,6 +30,8 @@ class ProductResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -56,12 +58,16 @@ class ProductResource extends Resource
                     ])->columnSpan(2),
 
                     Section::make('Product Images')->schema([
-                        Forms\Components\FileUpload::make('image')->image()
+                        Forms\Components\FileUpload::make('images')
+                        ->image()
                         ->multiple()
                         ->maxFiles(5)
                         ->directory('products')
                         ->reorderable()
-                        // ->required(),
+                        ->imagePreviewHeight('250')
+                        ->downloadable()
+                        ->openable()
+                        ->preserveFilenames()
                     ])->columnSpan(2),
 
                 ])->columnSpan(2),
@@ -130,6 +136,13 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('images')
+                    ->stacked()
+                    ->limit(1)
+                    ->height(50)
+                    ->width(50)
+                    ->extraImgAttributes(['class' => 'object-cover']),
+                    
                 Tables\Columns\TextColumn::make('name'),
                 
                 Tables\Columns\TextColumn::make('category.name', 'category.name')

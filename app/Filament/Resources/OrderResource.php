@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
+use App\Filament\Resources\OrderResource\RelationManagers\AddressRelationManager;
 use App\Models\Order;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -20,7 +21,7 @@ use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\Repeater;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextArea;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
@@ -38,9 +39,7 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static ?string $navigationIcon = 'her
-
-    oicon-o-shopping-cart';
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
 
     public static function form(Form $form): Form
     {
@@ -133,7 +132,7 @@ class OrderResource extends Resource
                       ->required()
                       ->inlineLabel(false),
 
-                      TextArea::make('notes')
+                      Textarea::make('notes')
                       ->columnSpanFull()
                     ])->columns(2),
 
@@ -170,24 +169,39 @@ class OrderResource extends Resource
                         ->required()
                         ->disabled()
                         ->dehydrated(false)
-                        ->columnSpan(2),
+                        ->columnSpan(2)
+                        ->afterStateHydrated(function ($state, Set $set, Get $get) {
+                            if ($state === null || $state === '') {
+                                $productId = $get('product_id');
+                                $price = Product::query()->whereKey($productId)->value('price') ?? 0;
+                                $set('unit_amount', $price);
+                            }
+                        }),
 
                         TextInput::make('total_amount')
                         ->numeric()
                         ->required()
                         ->dehydrated(false)
-                        ->columnSpan(3),
+                        ->columnSpan(3)
+                        ->afterStateHydrated(function ($state, Set $set, Get $get) {
+                            $qty = (int) ($get('quantity') ?? 1);
+                            $unit = (float) ($get('unit_amount') ?? (Product::query()->whereKey($get('product_id'))->value('price') ?? 0));
+                            $set('total_amount', $qty * $unit);
+                        }),
                       ])->columns(12),
 
                       Placeholder::make('grand_total_placeholder')
                       ->label('Grand Total')
-                      ->content(function (Get$get, Set $set){
+                      ->live()
+                      ->content(function (Get $get, Set $set){
                         $total = 0;
                         if (!$repeaters = $get('items')) {
                           return $total;
                         }
                         foreach ($repeaters as $key => $repeater) {
-                            $total += $get("items.{$key}.total_amount");
+                            $qty = (int) ($get("items.{$key}.quantity") ?? 1);
+                            $unit = (float) ($get("items.{$key}.unit_amount") ?? (Product::query()->whereKey($get("items.{$key}.product_id"))->value('price') ?? 0));
+                            $total += $qty * $unit;
                         }
                         $set('grand_total', $total);
                          return Number::currency($total, 'BRL');
@@ -278,7 +292,7 @@ class OrderResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AddressRelationManager::class,
         ];
     }
 
