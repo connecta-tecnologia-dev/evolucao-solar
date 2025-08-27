@@ -4,8 +4,7 @@
 @section('main')
     <x-default.header />
     <x-index.main-banner />
-    <x-index.body />
+    <x-index.body :products="$products" />
     <x-index.benefit />
     <x-default.footer />
-
 @endsection

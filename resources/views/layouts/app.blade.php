@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap">
+
 
     <title>{{ env('APP_NAME', 'Evolução Solar') }} - @yield('title')</title>
 
@@ -11,23 +14,6 @@
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
-
-    <style>
-        @font-face {
-            font-family: 'Momcake Bold';
-            src: url('fonts/momcake-bold.otf');
-        }
-
-        @font-face {
-            font-family: 'Momcake Thin';
-            src: url('fonts/momcake-thin.otf');
-        }
-
-        @font-face {
-            font-family: 'NeulisAlt Regular';
-            src: url('fonts/neulisalt-regular.ttf');
-        }
-    </style>
 
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
