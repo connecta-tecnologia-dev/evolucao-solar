@@ -62,12 +62,12 @@ class ProductResource extends Resource
                         ->image()
                         ->multiple()
                         ->maxFiles(5)
+                        ->hint('Max 5 files')
                         ->directory('products')
                         ->reorderable()
                         ->imagePreviewHeight('250')
                         ->downloadable()
                         ->openable()
-                        ->preserveFilenames()
                     ])->columnSpan(2),
 
                 ])->columnSpan(2),

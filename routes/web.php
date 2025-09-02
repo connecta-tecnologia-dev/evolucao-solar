@@ -1,8 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\View;
 use App\Models\Product;
+use App\Models\Category;
+
+View::composer('*', function ($view) {
+    $view->with('categories', Category::where('is_active', true)->get());
+});
 
 Route::get('/', function () {
     $products = Product::where('is_active', true)->get();
