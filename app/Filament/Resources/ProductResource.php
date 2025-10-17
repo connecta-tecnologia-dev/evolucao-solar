@@ -10,16 +10,11 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Forms\Components\MarkdownEditor;
 use Illuminate\Support\Str;
 use Filament\Forms\Set;
 use Filament\Tables\Actions\ActionGroup;
@@ -97,7 +92,7 @@ class ProductResource extends Resource
                         ->preload()
                         ->searchable()
                         ->required(),
-                        
+
                         Forms\Components\Select::make('brand_id')
                         ->relationship('brand', 'name')
                         ->preload()
@@ -126,7 +121,7 @@ class ProductResource extends Resource
                         Forms\Components\Toggle::make('on_sale')
                         ->required(),
                     ])
-                    
+
                 ])->columnSpan(1),
 
             ])->columns(3);
@@ -142,13 +137,13 @@ class ProductResource extends Resource
                     ->height(50)
                     ->width(50)
                     ->extraImgAttributes(['class' => 'object-cover']),
-                    
+
                 Tables\Columns\TextColumn::make('name'),
-                
+
                 Tables\Columns\TextColumn::make('category.name', 'category.name')
                 ->sortable()
                 ->searchable(),
-                
+
                 Tables\Columns\TextColumn::make('brand.name', 'brand.name')
                 ->sortable()
                 ->searchable(),
@@ -159,13 +154,13 @@ class ProductResource extends Resource
 
                 Tables\Columns\IconColumn::make('in_stock')
                 ->boolean(),
-                
+
                 Tables\Columns\IconColumn::make('is_active')
                 ->boolean(),
-                
+
                 Tables\Columns\IconColumn::make('is_featured')
                 ->boolean(),
-                
+
                 Tables\Columns\IconColumn::make('on_sale')
                 ->boolean(),
 
@@ -203,7 +198,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            
+
         ];
     }
 

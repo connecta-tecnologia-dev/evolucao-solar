@@ -3,21 +3,16 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
-use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Filament\Resources\OrderResource\RelationManagers\AddressRelationManager;
 use App\Models\Order;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
 use App\Models\Product;
-use Illuminate\Support\Str;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\Repeater;
 use Filament\Tables\Columns\TextColumn;
@@ -134,7 +129,7 @@ class OrderResource extends Resource
 
                       Textarea::make('notes')
                       ->columnSpanFull()
-                    ])->columns(2),
+                    ])->columns(),
 
                     Section::make('Order Items')->schema([
                       Repeater::make('items')
@@ -199,8 +194,8 @@ class OrderResource extends Resource
                           return $total;
                         }
                         foreach ($repeaters as $key => $repeater) {
-                            $qty = (int) ($get("items.{$key}.quantity") ?? 1);
-                            $unit = (float) ($get("items.{$key}.unit_amount") ?? (Product::query()->whereKey($get("items.{$key}.product_id"))->value('price') ?? 0));
+                            $qty = (int) ($get("items.$key.quantity") ?? 1);
+                            $unit = (float) ($get("items.$key.unit_amount") ?? (Product::query()->whereKey($get("items.$key.product_id"))->value('price') ?? 0));
                             $total += $qty * $unit;
                         }
                         $set('grand_total', $total);
@@ -210,7 +205,7 @@ class OrderResource extends Resource
                       Hidden::make('grand_total')
                       ->default(0),
 
-                      
+
                     ])
                 ])->columnSpanFull(),
             ]);
@@ -299,13 +294,13 @@ class OrderResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return (string) static::getModel()::count();
-    }    
-    
+    }
+
     public static function getNavigationBadgeColor(): string|array|null
     {
         return static::getModel()::count() > 10 ? 'sucess' : 'success';
     }
-    
+
 
     public static function getPages(): array
     {
